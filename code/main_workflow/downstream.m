@@ -32,8 +32,8 @@ pooling_method = "max";
 analyze_worm = 0;
 
 %% change this parameter to the frame per volume of your experiment
-frame_per_volume = 25;
-volume_per_second = 1;
+frame_per_volume = 1;
+volume_per_second = 5;
 
 %% main
 if root_folder_path ~= 0

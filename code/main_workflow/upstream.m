@@ -49,8 +49,8 @@ folder_path_green = list_green{1};
 
 %% For binarization
 binarization_method = "Gauss_Adapt"; % "Gauss_Adapt" is recommended
-sense_red = 0.2; % super-parameter
-sense_green = 0.2; % super-parameter
+sense_red = 0.22; % super-parameter
+sense_green = 0.22; % super-parameter
 
 %% For opening which splits the soma and the neurite
 
@@ -58,7 +58,7 @@ sense_green = 0.2; % super-parameter
 % suitable to be a template.
 all_template = "green"; 
 
-% "green" is recommended: In most cases, red channel is dimmer, so it is
+% "red" is recommended: In most cases, red channel is dimmer, so it is
 % easier to be splitted into the soma and the neurite than green channel.
 soma_template = "red";
 
@@ -66,8 +66,11 @@ soma_template = "red";
 % soma_template, "opposite" will retain more neurite than "same".
 neurite_template = "opposite"; 
 
-% disk size, super-parameter
-disk_size = 3;
+% disk size
+disk_size = 3; % super-parameter
+
+%% for the number of somas
+n_soma = 1;
 
 %% Opening for the whole neuron
 use_open_for_all = true; % true is recommended
@@ -76,13 +79,20 @@ disk_size_for_all = 2; % super-parameter
 %% fps
 frame_per_second = 25; % Hz
 
+%% Background intensity (Use image-J to get these)
+intensity_background_red = 114;
+intensity_background_green = 114;
+
+%% Light-leaking percentage (Ask Jiaqi Wang)
+leaking_percentage = 0.2;
+
 %% For multi worms
 region_prop_red = [];
 
 %% For test
 is_test = false;
-start_frame = 1;
-end_frame = 300;
+start_frame = 1000;
+end_frame = 1300;
 
 %% main
 tif_to_mask_and_mp4(folder_path_red,folder_path_green, ...
@@ -91,4 +101,6 @@ tif_to_mask_and_mp4(folder_path_red,folder_path_green, ...
     is_test,start_frame,end_frame,...
     use_open_for_all,disk_size_for_all,...
     region_prop_red,...
-    frame_per_second);
+    frame_per_second,...
+    n_soma, ...
+    intensity_background_red, intensity_background_green, leaking_percentage);

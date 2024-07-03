@@ -7,9 +7,11 @@ function tif_to_mask_and_mp4(folder_path_red,folder_path_green, ...
     binarization_method,sense_red,sense_green,...
     all_template,soma_template,neurite_template,disk_size,...
     is_test,start_frame,end_frame,...
-    use_open_for_all,disk_size_for_all, ...
-    region_prop_red, ...
-    frame_per_second)
+    use_open_for_all,disk_size_for_all,...
+    region_prop_red,...
+    frame_per_second,...
+    n_soma, ...
+    intensity_background_red, intensity_background_green, leaking_percentage)
 
 %% init
 
@@ -23,21 +25,23 @@ h = fspecial('gaussian',[G_size,G_size],G_std);
 
 %% test or not
 if is_test
-    video_name_str_red = sprintf('%s_size_%d_std_%d_sense_%.4f___disk_%d___from_%d_to_%d___red.mp4',...
+    video_name_str_red = sprintf('%s___size_%d_std_%d___sense_%.4f___disk_%d___from_%d_to_%d___red.mp4',...
         binarization_method,G_size,G_std,sense_red,disk_size,start_frame,end_frame);
-    video_name_str_green = sprintf('%s_size_%d_std_%d_sense_%.4f___disk_%d___from_%d_to_%d___green.mp4',...
+    video_name_str_green = sprintf('%s___size_%d_std_%d___sense_%.4f___disk_%d___from_%d_to_%d___green.mp4',...
         binarization_method,G_size,G_std,sense_green,disk_size,start_frame,end_frame);
 else
     start_frame = 1;
     end_frame = n_frame;
-    video_name_str_red = sprintf('%s_size_%d_std_%d_sense_%.4f___disk_%d___red.mp4',...
+    video_name_str_red = sprintf('%s___size_%d_std_%d___sense_%.4f___disk_%d___red.mp4',...
         binarization_method,G_size,G_std,sense_red,disk_size);
-    video_name_str_green = sprintf('%s_size_%d_std_%d_sense_%.4f___disk_%d___green.mp4',...
+    video_name_str_green = sprintf('%s___size_%d_std_%d___sense_%.4f___disk_%d___green.mp4',...
         binarization_method,G_size,G_std,sense_green,disk_size);
 end
 
 %% Init
-n_bright_pixel = nan(n_frame, 1);
+n_bright_pixel_all = nan(n_frame, 1);
+n_bright_pixel_soma = nan(n_frame, 1);
+n_bright_pixel_neurite = nan(n_frame, 1);
 intensity_red = nan(n_frame,1);
 intensity_soma_red = nan(n_frame,1);
 intensity_axon_dendrite_red = nan(n_frame,1);
@@ -49,12 +53,12 @@ intensity_axon_dendrite_green = nan(n_frame,1);
 video_format = 'MPEG-4';
 
 output_video_red = open_a_video(folder_path_red,video_name_str_red,video_format,frame_per_second);
-output_video_red_after_applying_all_template = open_a_video(folder_path_red,strrep(video_name_str_red,'_red.mp4','_red_after_applying_all_template.mp4'),video_format,frame_per_second);
+output_video_red_after_applying_all_template = open_a_video(folder_path_red,strrep(video_name_str_red,'_red.mp4','_red_opened.mp4'),video_format,frame_per_second);
 output_video_soma_red = open_a_video(folder_path_red,strrep(video_name_str_red,'_red.mp4','_red_soma.mp4'),video_format,frame_per_second);
 output_video_neurite_red = open_a_video(folder_path_red,strrep(video_name_str_red,'_red.mp4','_red_neurite.mp4'),video_format,frame_per_second);
 
 output_video_green = open_a_video(folder_path_green,video_name_str_green,video_format,frame_per_second);
-output_video_green_after_applying_all_template = open_a_video(folder_path_green,strrep(video_name_str_green,'_green.mp4','_green_after_applying_all_template.mp4'),video_format,frame_per_second);
+output_video_green_after_applying_all_template = open_a_video(folder_path_green,strrep(video_name_str_green,'_green.mp4','_green_opened.mp4'),video_format,frame_per_second);
 output_video_soma_green = open_a_video(folder_path_green,strrep(video_name_str_green,'_green.mp4','_green_soma.mp4'),video_format,frame_per_second);
 output_video_neurite_green = open_a_video(folder_path_green,strrep(video_name_str_green,'_green.mp4','_green_neurite.mp4'),video_format,frame_per_second);
 
@@ -109,7 +113,7 @@ for i = start_frame:end_frame
     switch soma_template
         case "red"
             % split the template
-            [soma_red,axon_dendrite_red] = split_soma_and_neurite(binary_frame_red,disk_size);
+            [soma_red,axon_dendrite_red] = split_soma_and_neurite(binary_frame_red,disk_size,n_soma);
 
             % split the other
             soma_green = flip(soma_red, 2);
@@ -120,13 +124,14 @@ for i = start_frame:end_frame
             switch neurite_template
                 case "same"
                     axon_dendrite_red = opening_for_neurite(axon_dendrite_red,2);
+                    axon_dendrite_green = flip(axon_dendrite_red, 2); % all, soma, neurite should have same area in both red and green channel.
                 case "opposite"
                     axon_dendrite_red = flip(axon_dendrite_green, 2);
             end
 
         case "green"
             % split the template
-            [soma_green,axon_dendrite_green] = split_soma_and_neurite(binary_frame_green,disk_size);
+            [soma_green,axon_dendrite_green] = split_soma_and_neurite(binary_frame_green,disk_size,n_soma);
 
             % split the other
             soma_red = flip(soma_green, 2);
@@ -137,6 +142,7 @@ for i = start_frame:end_frame
             switch neurite_template
                 case "same"
                     axon_dendrite_green = opening_for_neurite(axon_dendrite_green,2);
+                    axon_dendrite_red = flip(axon_dendrite_green, 2);
                 case "opposite"
                     axon_dendrite_green = flip(axon_dendrite_red, 2);
             end
@@ -168,16 +174,18 @@ for i = start_frame:end_frame
     %% save to numerical arrays
 
     % save n
-    n_bright_pixel(i) = sum(sum(binary_frame_red));
+    n_bright_pixel_all(i) = sum(sum(binary_frame_red));
+    n_bright_pixel_soma(i) = sum(sum(soma_red));
+    n_bright_pixel_neurite(i) = sum(sum(axon_dendrite_red));
 
     % save I
-    intensity_red(i) = sum(gray_frame_red(binary_frame_red));
-    intensity_soma_red(i) = sum(gray_frame_red(soma_red));
-    intensity_axon_dendrite_red(i) = sum(gray_frame_red(axon_dendrite_red));
+    intensity_red(i) = sum(gray_frame_red(binary_frame_red)) / n_bright_pixel_all(i);
+    intensity_soma_red(i) = sum(gray_frame_red(soma_red)) / n_bright_pixel_soma(i);
+    intensity_axon_dendrite_red(i) = sum(gray_frame_red(axon_dendrite_red)) / n_bright_pixel_neurite(i);
 
-    intensity_green(i) = sum(gray_frame_green(binary_frame_green));
-    intensity_soma_green(i) = sum(gray_frame_green(soma_green));
-    intensity_axon_dendrite_green(i) = sum(gray_frame_green(axon_dendrite_green));
+    intensity_green(i) = sum(gray_frame_green(binary_frame_green)) / n_bright_pixel_all(i);
+    intensity_soma_green(i) = sum(gray_frame_green(soma_green)) / n_bright_pixel_soma(i);
+    intensity_axon_dendrite_green(i) = sum(gray_frame_green(axon_dendrite_green)) / n_bright_pixel_neurite(i);
 
     %% multi worms
     if ~isempty(region_prop_red)
@@ -197,7 +205,6 @@ for i = start_frame:end_frame
             mask_green = flip(mask_red,2);
 
             % get Intensity
-
             binary_frame_red_for_current_worm = binary_frame_red & mask_red;
             binary_frame_green_for_current_worm = binary_frame_green & mask_green;
             intensity_red_for_current_worm = sum(gray_frame_red(binary_frame_red_for_current_worm));
@@ -214,7 +221,21 @@ for i = start_frame:end_frame
             end
         end
     end
+end
 
+%% Subtract background
+intensity_red = intensity_red - intensity_background_red;
+intensity_soma_red = intensity_soma_red - intensity_background_red;
+intensity_axon_dendrite_red = intensity_axon_dendrite_red - intensity_background_red;
+
+intensity_green = intensity_green - intensity_background_green;
+intensity_soma_green = intensity_soma_green - intensity_background_green;
+intensity_axon_dendrite_green = intensity_axon_dendrite_green - intensity_background_green;
+
+%% Fix light-leaking problem
+intensity_red = intensity_red - intensity_green * leaking_percentage;
+if sum(intensity_red < 0) >= 1
+    why;
 end
 
 %% Close
@@ -231,10 +252,10 @@ close(output_video_neurite_green);
 %% Tukey for n
 IQR_index = 5;
 figure;
-histogram(n_bright_pixel(~isnan(n_bright_pixel)));
+histogram(n_bright_pixel_all(~isnan(n_bright_pixel_all)));
 xlabel("number of bright pixels of certain binary frame");
 ylabel("count");
-[~, ~, mask_up, mask_down, up_limit, down_limit, upper_bound, lower_bound] = Tukey_test(n_bright_pixel, IQR_index);
+[~, ~, mask_up, mask_down, up_limit, down_limit, upper_bound, lower_bound] = Tukey_test(n_bright_pixel_all, IQR_index);
 Tukey_test_draw_lines(up_limit, down_limit, upper_bound, lower_bound);
 saveas(gcf,fullfile(folder_path_red, 'Tukey_test_of_n_of_bright_pixels'),'png');
 

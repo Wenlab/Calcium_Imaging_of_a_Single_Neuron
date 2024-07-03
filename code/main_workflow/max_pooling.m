@@ -1,6 +1,7 @@
 function intensity_volume = max_pooling(intensity, frame_per_volume)
 
-% max-pooling for a volume. 
+% max-pooling for a volume. This procedure is equals to the so-called Max
+% Intensity Projection.
 %
 % 2024-04-15, Yixuan Li
 %

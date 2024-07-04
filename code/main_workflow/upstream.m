@@ -49,8 +49,8 @@ folder_path_green = list_green{1};
 
 %% For binarization
 binarization_method = "Gauss_Adapt"; % "Gauss_Adapt" is recommended
-sense_red = 0.22; % super-parameter
-sense_green = 0.22; % super-parameter
+sense_red = 0.55; % super-parameter
+sense_green = 0.55; % super-parameter
 
 %% For opening which splits the soma and the neurite
 
@@ -67,10 +67,10 @@ soma_template = "red";
 neurite_template = "opposite"; 
 
 % disk size
-disk_size = 3; % super-parameter
+disk_size = 5; % super-parameter
 
 %% for the number of somas
-n_soma = 1;
+n_soma = 2;
 
 %% Opening for the whole neuron
 use_open_for_all = true; % true is recommended
@@ -83,16 +83,13 @@ frame_per_second = 25; % Hz
 intensity_background_red = 114;
 intensity_background_green = 114;
 
-%% Light-leaking percentage (Ask Jiaqi Wang)
-leaking_percentage = 0.2;
-
 %% For multi worms
 region_prop_red = [];
 
 %% For test
 is_test = false;
-start_frame = 1000;
-end_frame = 1300;
+start_frame = 001;
+end_frame = 300;
 
 %% main
 tif_to_mask_and_mp4(folder_path_red,folder_path_green, ...
@@ -103,4 +100,4 @@ tif_to_mask_and_mp4(folder_path_red,folder_path_green, ...
     region_prop_red,...
     frame_per_second,...
     n_soma, ...
-    intensity_background_red, intensity_background_green, leaking_percentage);
+    intensity_background_red, intensity_background_green);

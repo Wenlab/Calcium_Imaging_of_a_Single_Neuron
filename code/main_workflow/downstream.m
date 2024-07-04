@@ -35,6 +35,9 @@ analyze_worm = 0;
 frame_per_volume = 1;
 volume_per_second = 5;
 
+%% Light-leaking percentage (Ask Jiaqi Wang)
+leaking_percentage = 0;
+
 %% main
 if root_folder_path ~= 0
     root_list = get_all_folders_of_a_certain_name_pattern_in_a_rootpath(root_folder_path,'w');
@@ -58,7 +61,7 @@ if root_folder_path ~= 0
             intensity_and_mask_to_intensity(folder_path_Green,analyze_area,frame_per_volume,analyze_worm);
 
             %% I_volume to figures
-            draw_red_green_together(folder_path,pooling_method,analyze_area,analyze_worm,volume_per_second);
+            draw_red_green_together(folder_path,pooling_method,analyze_area,analyze_worm,volume_per_second,leaking_percentage);
         end
     end
 end

@@ -3,7 +3,7 @@
 % 2023-12-13, Yixuan Li
 %
 
-function draw_red_green_together(folder_path,pooling_method,analyze_area,analyze_worm,volume_per_second)
+function draw_red_green_together(folder_path,pooling_method,analyze_area,analyze_worm,volume_per_second,leaking_percentage)
 
 % Get a list of all .tif files in the folder
 switch pooling_method
@@ -26,38 +26,45 @@ if length(list) ~= 2
     error("The number of intensity_volume.mat is not 2!");
 end
 
-%% load data
-I_1 = load_data_from_mat(list{1});
-I_2 = load_data_from_mat(list{2});
-
-%% number of volumes
-n_volume = length(I_1);
-
 %% get channel info
 if contains(list{1},"Red")
     I_1_info = "Red";
     I_2_info = "Green";
 elseif contains(list{1},"Green")
-    I_1_info = "Green";
-    I_2_info = "Red";
+    error("The Red and Green Channels Are Switched.");
 end
+
+%% load data
+I_red = load_data_from_mat(list{1});
+I_green = load_data_from_mat(list{2});
+
+%% Fix light-leaking problem
+
+I_red = I_red - I_green * leaking_percentage;
+
+if sum(I_red < 0) >= 1
+    why;
+end
+
+%% number of volumes
+n_volume = length(I_red);
 
 %% Tukey
 figure;
-histogram(I_1);
+histogram(I_red);
 xlabel("I_1");
 ylabel("count");
 IQR_index = 3;
-[~, ~, mask_up_1, mask_down_1, up_limit, down_limit, upper_bound, lower_bound] = Tukey_test(I_1, IQR_index);
+[~, ~, mask_up_1, mask_down_1, up_limit, down_limit, upper_bound, lower_bound] = Tukey_test(I_red, IQR_index);
 Tukey_test_draw_lines(up_limit, down_limit, upper_bound, lower_bound);
 saveas(gcf,fullfile(save_folder_path, 'Tukey_test_for_I_1'),'png');
 
 figure;
-histogram(I_2);
+histogram(I_green);
 xlabel("I_2");
 ylabel("count");
 IQR_index = 3;
-[~, ~, mask_up_2, mask_down_2, up_limit, down_limit, upper_bound, lower_bound] = Tukey_test(I_2, IQR_index);
+[~, ~, mask_up_2, mask_down_2, up_limit, down_limit, upper_bound, lower_bound] = Tukey_test(I_green, IQR_index);
 Tukey_test_draw_lines(up_limit, down_limit, upper_bound, lower_bound);
 saveas(gcf,fullfile(save_folder_path, 'Tukey_test_for_I_2'),'png');
 
@@ -65,25 +72,25 @@ mask_up = mask_up_1 | mask_up_2;
 mask_down = mask_down_1 | mask_down_2;
 
 is_outlier = mask_up | mask_down;
-I_1(is_outlier) = nan;
-I_2(is_outlier) = nan;
+I_red(is_outlier) = nan;
+I_green(is_outlier) = nan;
 
 %% plot I
 figure;
 
 subplot(4,1,1)
-plot_intensity(I_1,list{1});
+plot_intensity(I_red,list{1});
 volume_to_second_for_xlabel(n_volume,volume_per_second);
 
 subplot(4,1,2)
-plot_intensity(I_2,list{2});
+plot_intensity(I_green,list{2});
 volume_to_second_for_xlabel(n_volume,volume_per_second);
 
 subplot(4,1,3)
 if I_1_info == "Red"
-    I_ratio = plot_ratio(I_1,I_2);
+    I_ratio = plot_ratio(I_red,I_green);
 else
-    I_ratio = plot_ratio(I_2,I_1);
+    I_ratio = plot_ratio(I_green,I_red);
 end
 volume_to_second_for_xlabel(n_volume,volume_per_second);
 
@@ -102,35 +109,35 @@ saveas(gcf,fullfile(save_folder_path, 'intensity_r_g_ratio'),'fig');
 
 %% plot normalized I
 figure;
-I_1_normalized = plot_intensity_normalized(I_1,list{1});
+I_1_normalized = plot_intensity_normalized(I_red,list{1});
 subtitle(sprintf("volume per second = %d",volume_per_second));
 set_full_screen;
 
 figure;
-I_2_normalized = plot_intensity_normalized(I_2,list{2});
+I_2_normalized = plot_intensity_normalized(I_green,list{2});
 subtitle(sprintf("volume per second = %d",volume_per_second));
 set_full_screen;
 
 %% plot I
 figure;
-plot_intensity(I_1,list{1});
+plot_intensity(I_red,list{1});
 xlabel("volume","FontSize",20);
 subtitle(sprintf("volume per second = %d",volume_per_second));
 set_full_screen;
 
 figure;
-plot_intensity(I_2,list{2});
+plot_intensity(I_green,list{2});
 xlabel("volume","FontSize",20);
 subtitle(sprintf("volume per second = %d",volume_per_second));
 set_full_screen;
 
 %% Corr
-is_nan_1 = isnan(I_1);
-is_nan_2 = isnan(I_2);
+is_nan_1 = isnan(I_red);
+is_nan_2 = isnan(I_green);
 is_nan = is_nan_1 | is_nan_2;
 
-I_1_filted = I_1(~is_nan);
-I_2_filted = I_2(~is_nan);
+I_1_filted = I_red(~is_nan);
+I_2_filted = I_green(~is_nan);
 
 % Pearson Corr
 r = corrcoef(I_1_filted,I_2_filted);
@@ -154,11 +161,11 @@ close all;
 
 %% Coefficient of Variance
 if I_1_info == "Red"
-    CV_Red = std(I_1,'omitnan') / mean(I_1,'omitnan');
-    CV_Green = std(I_2,'omitnan') / mean(I_2,'omitnan');
+    CV_Red = std(I_red,'omitnan') / mean(I_red,'omitnan');
+    CV_Green = std(I_green,'omitnan') / mean(I_green,'omitnan');
 else
-    CV_Red = std(I_2,'omitnan') / mean(I_2,'omitnan');
-    CV_Green = std(I_1,'omitnan') / mean(I_1,'omitnan');
+    CV_Red = std(I_green,'omitnan') / mean(I_green,'omitnan');
+    CV_Green = std(I_red,'omitnan') / mean(I_red,'omitnan');
 end
 
 save_para_value_to_txt(save_folder_path, CV_Red);

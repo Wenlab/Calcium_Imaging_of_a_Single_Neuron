@@ -11,7 +11,7 @@ function tif_to_mask_and_mp4(folder_path_red,folder_path_green, ...
     region_prop_red,...
     frame_per_second,...
     n_soma, ...
-    intensity_background_red, intensity_background_green, leaking_percentage)
+    intensity_background_red, intensity_background_green)
 
 %% init
 
@@ -231,12 +231,6 @@ intensity_axon_dendrite_red = intensity_axon_dendrite_red - intensity_background
 intensity_green = intensity_green - intensity_background_green;
 intensity_soma_green = intensity_soma_green - intensity_background_green;
 intensity_axon_dendrite_green = intensity_axon_dendrite_green - intensity_background_green;
-
-%% Fix light-leaking problem
-intensity_red = intensity_red - intensity_green * leaking_percentage;
-if sum(intensity_red < 0) >= 1
-    why;
-end
 
 %% Close
 close(output_video_red);

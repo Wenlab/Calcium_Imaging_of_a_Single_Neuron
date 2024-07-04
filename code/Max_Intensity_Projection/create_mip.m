@@ -13,7 +13,7 @@ function create_mip(folder_path, frame_per_volume)
     
     % Process every volume
     for idx = 1:frame_per_volume:num_files
-        end_idx = min(idx + 19, num_files); % Ensure we don't go out of bounds
+        end_idx = min(idx + frame_per_volume - 1, num_files); % Ensure we don't go out of bounds
         max_image = []; % Initialize the MIP image
 
         % Read and compute the maximum intensity projection

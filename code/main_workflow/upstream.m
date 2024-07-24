@@ -56,11 +56,11 @@ sense_green = 0.55; % super-parameter
 
 % "green" is recommended: In most cases, green channel is brighter, so it is more
 % suitable to be a template.
-all_template = "green"; 
+all_template = "red"; 
 
 % "red" is recommended: In most cases, red channel is dimmer, so it is
 % easier to be splitted into the soma and the neurite than green channel.
-soma_template = "red";
+soma_template = "green";
 
 % "opposite" is recommended: Given that it is recommended to use dimmer channel as
 % soma_template, "opposite" will retain more neurite than "same".

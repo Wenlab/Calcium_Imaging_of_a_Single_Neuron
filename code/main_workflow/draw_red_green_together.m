@@ -94,15 +94,16 @@ else
 end
 volume_to_second_for_xlabel(n_volume,volume_per_second);
 
-subplot(4,1,4)
-I_ratio_normalized = normalization_dividing_by_the_mean(I_ratio);
-plot(1:length(I_ratio_normalized),I_ratio_normalized,'k');
-
-volume_to_second_for_xlabel(n_volume,volume_per_second);
-xlabel("t (s)","FontSize",20);
-ylabel("$\frac{ratio-<ratio>}{<ratio>}$","Interpreter","latex","FontSize",20);
-ylim([-0.5 +0.5]);
-
+% subplot(4,1,4)
+% I_ratio_normalized = normalization_dividing_by_the_mean(I_ratio);
+% plot(1:length(I_ratio_normalized),I_ratio_normalized,'k');
+% 
+% volume_to_second_for_xlabel(n_volume,volume_per_second);
+% xlabel("t (s)","FontSize",20);
+% % ylabel("$\frac{ratio-<ratio>}{<ratio>}$","Interpreter","latex","FontSize",20);
+% ylabel("$\frac{ratio-<ratio>}{std(ratio)}$","Interpreter","latex","FontSize",20);
+% ylim([-0.5 +0.5]);
+% 
 set_full_screen;
 saveas(gcf,fullfile(save_folder_path, 'intensity_r_g_ratio'),'png');
 saveas(gcf,fullfile(save_folder_path, 'intensity_r_g_ratio'),'fig');
@@ -157,7 +158,7 @@ title(sprintf("r = %.2f; b = %.2f",r(1,2),p(1)));
 saveas(gcf,fullfile(save_folder_path, 'Visualize_as_X_and_Y'),'png');
 
 %% close
-close all;
+% close all;
 
 %% Coefficient of Variance
 if I_1_info == "Red"

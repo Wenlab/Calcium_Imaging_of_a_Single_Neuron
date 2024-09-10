@@ -13,8 +13,13 @@ function tif_to_mask_and_mp4(folder_path_red,folder_path_green, ...
     n_soma, ...
     intensity_background_red, intensity_background_green)
 
-%% init
+%% save folder path
+save_folder_path_red = strrep(folder_path_red,"data","result");
+create_folder(save_folder_path_red);
+save_folder_path_green = strrep(folder_path_green,"data","result");
+create_folder(save_folder_path_green);
 
+%% Init
 % get paths
 [files_red, files_green, n_frame] = init_paths(folder_path_red, folder_path_green);
 
@@ -52,15 +57,15 @@ intensity_axon_dendrite_green = nan(n_frame,1);
 %% Create VideoWriter
 video_format = 'MPEG-4';
 
-output_video_red = open_a_video(folder_path_red,video_name_str_red,video_format,frame_per_second);
-output_video_red_after_applying_all_template = open_a_video(folder_path_red,strrep(video_name_str_red,'_red.mp4','_red_opened.mp4'),video_format,frame_per_second);
-output_video_soma_red = open_a_video(folder_path_red,strrep(video_name_str_red,'_red.mp4','_red_soma.mp4'),video_format,frame_per_second);
-output_video_neurite_red = open_a_video(folder_path_red,strrep(video_name_str_red,'_red.mp4','_red_neurite.mp4'),video_format,frame_per_second);
+output_video_red = open_a_video(save_folder_path_red,video_name_str_red,video_format,frame_per_second);
+output_video_red_after_applying_all_template = open_a_video(save_folder_path_red,strrep(video_name_str_red,'_red.mp4','_red_opened.mp4'),video_format,frame_per_second);
+output_video_soma_red = open_a_video(save_folder_path_red,strrep(video_name_str_red,'_red.mp4','_red_soma.mp4'),video_format,frame_per_second);
+output_video_neurite_red = open_a_video(save_folder_path_red,strrep(video_name_str_red,'_red.mp4','_red_neurite.mp4'),video_format,frame_per_second);
 
-output_video_green = open_a_video(folder_path_green,video_name_str_green,video_format,frame_per_second);
-output_video_green_after_applying_all_template = open_a_video(folder_path_green,strrep(video_name_str_green,'_green.mp4','_green_opened.mp4'),video_format,frame_per_second);
-output_video_soma_green = open_a_video(folder_path_green,strrep(video_name_str_green,'_green.mp4','_green_soma.mp4'),video_format,frame_per_second);
-output_video_neurite_green = open_a_video(folder_path_green,strrep(video_name_str_green,'_green.mp4','_green_neurite.mp4'),video_format,frame_per_second);
+output_video_green = open_a_video(save_folder_path_green,video_name_str_green,video_format,frame_per_second);
+output_video_green_after_applying_all_template = open_a_video(save_folder_path_green,strrep(video_name_str_green,'_green.mp4','_green_opened.mp4'),video_format,frame_per_second);
+output_video_soma_green = open_a_video(save_folder_path_green,strrep(video_name_str_green,'_green.mp4','_green_soma.mp4'),video_format,frame_per_second);
+output_video_neurite_green = open_a_video(save_folder_path_green,strrep(video_name_str_green,'_green.mp4','_green_neurite.mp4'),video_format,frame_per_second);
 
 %% multi worm
 
@@ -251,7 +256,7 @@ xlabel("number of bright pixels of certain binary frame");
 ylabel("count");
 [~, ~, mask_up, mask_down, up_limit, down_limit, upper_bound, lower_bound] = Tukey_test(n_bright_pixel_all, IQR_index);
 Tukey_test_draw_lines(up_limit, down_limit, upper_bound, lower_bound);
-saveas(gcf,fullfile(folder_path_red, 'Tukey_test_of_n_of_bright_pixels'),'png');
+saveas(gcf,fullfile(save_folder_path_red, 'Tukey_test_of_n_of_bright_pixels'),'png');
 
 % Calculate outliers
 is_outlier_1 = mask_up | mask_down;
@@ -264,7 +269,7 @@ xlabel("intensity of bright pixels of certain binary frame");
 ylabel("count");
 [~, ~, mask_up, mask_down, up_limit, down_limit, upper_bound, lower_bound] = Tukey_test(intensity_red, IQR_index);
 Tukey_test_draw_lines(up_limit, down_limit, upper_bound, lower_bound);
-saveas(gcf,fullfile(folder_path_red, 'Tukey_test_of_I_of_bright_pixels'),'png');
+saveas(gcf,fullfile(save_folder_path_green, 'Tukey_test_of_I_of_bright_pixels'),'png');
 
 % Calculate outliers
 is_outlier_2 = mask_up | mask_down;
@@ -273,16 +278,16 @@ is_outlier_2 = mask_up | mask_down;
 is_outlier = is_outlier_1 | is_outlier_2;
 
 %% save
-save(fullfile(folder_path_red, 'is_outlier.mat'), 'is_outlier');
-save(fullfile(folder_path_red, 'intensity.mat'), 'intensity_red');
-save(fullfile(folder_path_red, 'intensity_soma.mat'), 'intensity_soma_red');
-save(fullfile(folder_path_red, 'intensity_axon_dendrite.mat'), 'intensity_axon_dendrite_red');
+save(fullfile(save_folder_path_red, 'is_outlier.mat'), 'is_outlier');
+save(fullfile(save_folder_path_red, 'intensity.mat'), 'intensity_red');
+save(fullfile(save_folder_path_red, 'intensity_soma.mat'), 'intensity_soma_red');
+save(fullfile(save_folder_path_red, 'intensity_axon_dendrite.mat'), 'intensity_axon_dendrite_red');
 % save(fullfile(folder_path_red, 'intensity_split_worm.mat'), 'intensity_red_split_worm');
 
-save(fullfile(folder_path_green, 'is_outlier.mat'), 'is_outlier');
-save(fullfile(folder_path_green, 'intensity.mat'), 'intensity_green');
-save(fullfile(folder_path_green, 'intensity_soma.mat'), 'intensity_soma_green');
-save(fullfile(folder_path_green, 'intensity_axon_dendrite.mat'), 'intensity_axon_dendrite_green');
+save(fullfile(save_folder_path_green, 'is_outlier.mat'), 'is_outlier');
+save(fullfile(save_folder_path_green, 'intensity.mat'), 'intensity_green');
+save(fullfile(save_folder_path_green, 'intensity_soma.mat'), 'intensity_soma_green');
+save(fullfile(save_folder_path_green, 'intensity_axon_dendrite.mat'), 'intensity_axon_dendrite_green');
 % save(fullfile(folder_path_green, 'intensity_split_worm.mat'), 'intensity_green_split_worm');
 
 %% close

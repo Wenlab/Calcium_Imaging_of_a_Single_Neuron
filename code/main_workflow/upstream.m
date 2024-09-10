@@ -1,35 +1,38 @@
-% up-stream: `.tif` -> `is_outlier.mat`, `.mp4`, `intensity.mat`
+% up-stream:
+%   `.tif` -> `is_outlier.mat`, `.mp4`, `intensity.mat`
 %
 % For binarization:
-% binarization method: "Direct_Adapt", "Gauss_Adapt".
-% sensitivity threshold: higher, more bright pixels.
+%   binarization method: "Direct_Adapt", "Gauss_Adapt".
+%   sensitivity threshold: higher, more bright pixels.
 %
 % For opening:
-% template: use which channel's binarization result as the template.
-% all_template: "red", "green", "nan".
-% soma_template: "red", "green".
-% neurite_template: "same", "opposite".
+%   template: use which channel's binarization result as the template.
+%   all_template: "red", "green", "nan".
+%   soma_template: "red", "green".
+%   neurite_template: "same", "opposite".
 %
-% disk_size: larger, open more severely.
+% disk_size: 
+%   larger, open more severely.
 %
-% Open for all:
-% You can increase sensation threshold and then use opening for all.
+% Open for all: 
+%   You can increase sensation threshold and then use opening for all.
 %
-% For multi worms:
-% If your .tif files contain more than 1 worm (which is often the case when
-% we test immobile animals), you can simply write the rectangle containg
-% the worm in region_prop. eg: region_prop_red =
-% [600,800,100,300;480,600,540,680]. And set region_prop_red = [] if only 1 worm.
-% For all_template: "nan" is recommended for multi-worm, because different
-% worms will have different brighter channel.
+% For multi worms: (depracated)
+%   If your .tif files contain more than 1 worm (which is often the case when
+%   we test immobile animals), you can simply write the rectangle containg
+%   the worm in region_prop. eg: region_prop_red =
+%   [600,800,100,300;480,600,540,680]. And set region_prop_red = [] if only 1 worm.
+%
+%   For all_template: "nan" is recommended for multi-worm, because different
+%   worms will have different brighter channel.
 %
 % Frame per second:
-% The fps of you data.
+%   The fps of you data.
 %
 % For test:
-% is_test: "true", "false".
-% You can set it as "true" with setting the start frame and the end frame 
-% to test the super-parameter.
+%   is_test: "true", "false".
+%   You can set it as "true" with setting the start frame and the end frame 
+%   to test the super-parameter.
 %
 % 2023-12-19, Yixuan Li
 %
@@ -49,8 +52,8 @@ folder_path_green = list_green{1};
 
 %% For binarization
 binarization_method = "Gauss_Adapt"; % "Gauss_Adapt" is recommended
-sense_red = 0.55; % super-parameter
-sense_green = 0.55; % super-parameter
+sense_red = 0.5; % super-parameter
+sense_green = 0.5; % super-parameter
 
 %% For opening which splits the soma and the neurite
 
@@ -70,25 +73,25 @@ neurite_template = "opposite";
 disk_size = 5; % super-parameter
 
 %% for the number of somas
-n_soma = 2;
+n_soma = 1;
 
 %% Opening for the whole neuron
 use_open_for_all = true; % true is recommended
 disk_size_for_all = 2; % super-parameter
 
 %% fps
-frame_per_second = 25; % Hz
+frame_per_second = 100; % Hz
 
 %% Background intensity (Use image-J to get these)
-intensity_background_red = 114;
-intensity_background_green = 114;
+intensity_background_red = 101;
+intensity_background_green = 101;
 
 %% For multi worms
 region_prop_red = [];
 
 %% For test
 is_test = false;
-start_frame = 001;
+start_frame = 1;
 end_frame = 300;
 
 %% main

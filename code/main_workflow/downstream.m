@@ -23,7 +23,7 @@ my_add_path();
 root_folder_path = uigetdir;
 
 %% choose the area that you want to analyze
-analyze_area = "axon_dendrite";
+analyze_area = "all";
 
 %% choose the pooling method
 pooling_method = "max";
@@ -32,7 +32,7 @@ pooling_method = "max";
 analyze_worm = 0;
 
 %% change this parameter to the frame per volume of your experiment
-frame_per_volume = 1;
+frame_per_volume = 20;
 volume_per_second = 5;
 
 %% Light-leaking percentage (Ask Jiaqi Wang)

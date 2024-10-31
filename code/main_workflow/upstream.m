@@ -38,9 +38,7 @@
 %
 
 clc;clear;close all;
-
 dbstop if error;
-
 my_add_path();
 
 %% choose the path to the data
@@ -91,8 +89,8 @@ region_prop_red = [];
 
 %% For test
 is_test = false;
-start_frame = 1;
-end_frame = 300;
+start_frame = 7000;
+end_frame = 7300;
 
 %% main
 tif_to_mask_and_mp4(folder_path_red,folder_path_green, ...
